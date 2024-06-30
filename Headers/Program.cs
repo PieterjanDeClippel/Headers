@@ -55,8 +55,10 @@ app.MapGet("/weatherforecast", () =>
 app.MapGet("/", async (context) =>
 {
     var head = string.Join(Environment.NewLine, context.Request.Headers.Select(h => $"{h.Key}: {h.Value}"));
-    var subj = context.Connection.ClientCertificate?.SubjectName?.Name;
-    await context.Response.WriteAsJsonAsync(new { head, subj });
+    var cert = context.Connection.ClientCertificate != null;
+    var subj = context.Connection.ClientCertificate?.SubjectName != null;
+    var name = context.Connection.ClientCertificate?.SubjectName?.Name != null;
+    await context.Response.WriteAsJsonAsync(new { head, cert = new { cert, subj, name } });
 });
 
 app.Run();
