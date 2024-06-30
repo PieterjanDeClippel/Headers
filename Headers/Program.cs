@@ -1,11 +1,36 @@
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddAuthentication("certscheme")
+    .AddCertificate("certscheme", o =>
+    {
+        o.AllowedCertificateTypes = Microsoft.AspNetCore.Authentication.Certificate.CertificateTypes.All;
+        o.RevocationMode = System.Security.Cryptography.X509Certificates.X509RevocationMode.NoCheck;
+        o.Events = new Microsoft.AspNetCore.Authentication.Certificate.CertificateAuthenticationEvents
+        {
+            OnCertificateValidated = (context) =>
+            {
+                context.Success();
+                return Task.CompletedTask;
+            }
+        };
+    });
+
+builder.WebHost.ConfigureKestrel(k =>
+{
+    k.ConfigureHttpsDefaults(http =>
+    {
+        http.ClientCertificateValidation = (_, __, ___) => true;
+        http.ClientCertificateMode = Microsoft.AspNetCore.Server.Kestrel.Https.ClientCertificateMode.RequireCertificate;
+    });
+});
+builder.WebHost.UseKestrelHttpsConfiguration();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
+app.UseHealthChecks("/healtz");
 app.UseHttpsRedirection();
 
 var summaries = new[]
