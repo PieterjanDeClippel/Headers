@@ -29,7 +29,7 @@ app.MapGet("/weatherforecast", () =>
 app.MapGet("/", async (context) =>
 {
     var head = string.Join(Environment.NewLine, context.Request.Headers.Select(h => $"{h.Key}: {h.Value}"));
-    await context.Response.WriteAsJsonAsync(head);
+    await context.Response.WriteAsync(head);
 });
 
 app.Run();
